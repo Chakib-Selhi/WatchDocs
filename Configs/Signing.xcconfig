@@ -1,0 +1,13 @@
+// Signing and identifiers shared by every target.
+//
+// Do not put your personal values here. Copy Local.example.xcconfig to
+// Local.xcconfig (ignored by git) and set your own team ID and prefix.
+
+// Prefix of every bundle identifier and of the App Group.
+BUNDLE_PREFIX = com.example
+
+// Apple Developer team ID (empty: choose a team in Xcode).
+DEVELOPMENT_TEAM =
+
+// Personal overrides, if present.
+#include? "Local.xcconfig"

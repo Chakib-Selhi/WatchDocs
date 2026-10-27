@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  kit-macos:
+    name: WatchDocsKit tests (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift tests
+        working-directory: Packages/WatchDocsKit
+        run: swift test
+
+  kit-linux:
+    name: WatchDocsKit tests (Linux)
+    runs-on: ubuntu-latest
+    container: swift:6.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift tests
+        working-directory: Packages/WatchDocsKit
+        run: swift test
+
+  apps:
+    name: Build iOS and watchOS apps
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      - name: Build iOS app (with share extension and embedded watch app)
+        run: |
+          xcodebuild -scheme WatchDocs \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO -quiet build
+      - name: Build watchOS app
+        run: |
+          xcodebuild -scheme WatchDocsWatch \
+            -destination 'generic/platform=watchOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO -quiet build

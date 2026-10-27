@@ -1,0 +1,196 @@
+name: WatchDocs
+
+# Bundle prefix and team ID come from Configs/Signing.xcconfig,
+# overridden by Configs/Local.xcconfig (not committed). See docs/INSTALL.md.
+configFiles:
+  Debug: Configs/Signing.xcconfig
+  Release: Configs/Signing.xcconfig
+
+settings:
+  base:
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    CODE_SIGN_STYLE: Automatic
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+options:
+  deploymentTarget:
+    iOS: "17.0"
+    watchOS: "10.0"
+  developmentLanguage: en
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+packages:
+  WatchDocsKit:
+    path: Packages/WatchDocsKit
+  ZIPFoundation:
+    url: https://github.com/weichsel/ZIPFoundation
+    from: 0.9.19
+  CoreXLSX:
+    url: https://github.com/CoreOffice/CoreXLSX
+    from: 0.14.2
+
+targets:
+  # ---------------------------------------------------------------- iOS app
+  WatchDocs:
+    type: application
+    platform: iOS
+    sources:
+      - path: WatchDocs
+      - path: Shared
+    dependencies:
+      - package: WatchDocsKit
+      - package: ZIPFoundation
+      - package: CoreXLSX
+      - target: WatchDocsShare
+        embed: true
+      # XcodeGen puts watchOS apps in the "Embed Watch Content" phase ($(CONTENTS_FOLDER_PATH)/Watch).
+      - target: WatchDocsWatch
+        embed: true
+    entitlements:
+      path: WatchDocs/WatchDocs.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.$(BUNDLE_PREFIX).watchdocs
+    info:
+      path: WatchDocs/Info.plist
+      properties:
+        CFBundleDisplayName: WatchDocs
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UIApplicationSupportsIndirectInputEvents: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIBackgroundModes:
+          - processing
+        BGTaskSchedulerPermittedIdentifiers:
+          - $(PRODUCT_BUNDLE_IDENTIFIER).inbox
+        WDAppGroup: group.$(BUNDLE_PREFIX).watchdocs
+        LSSupportsOpeningDocumentsInPlace: false
+        CFBundleLocalizations: [en, fr]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).watchdocs
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+
+  # ------------------------------------------------------- Share extension
+  WatchDocsShare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: WatchDocsShare
+      - path: Shared
+    dependencies:
+      - package: WatchDocsKit
+    entitlements:
+      path: WatchDocsShare/WatchDocsShare.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.$(BUNDLE_PREFIX).watchdocs
+    info:
+      path: WatchDocsShare/Info.plist
+      properties:
+        CFBundleDisplayName: Send to Watch
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        WDAppGroup: group.$(BUNDLE_PREFIX).watchdocs
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsFileWithMaxCount: 100
+              NSExtensionActivationSupportsImageWithMaxCount: 100
+              NSExtensionActivationSupportsMovieWithMaxCount: 0
+              NSExtensionActivationSupportsText: true
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+              NSExtensionActivationSupportsWebPageWithMaxCount: 1
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).watchdocs.share
+        TARGETED_DEVICE_FAMILY: "1"
+
+  # ----------------------------------------------------------- watchOS app
+  WatchDocsWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: WatchDocsWatch
+    dependencies:
+      - package: WatchDocsKit
+    info:
+      path: WatchDocsWatch/Info.plist
+      properties:
+        CFBundleDisplayName: WatchDocs
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: $(BUNDLE_PREFIX).watchdocs
+        WKRunsIndependentlyOfCompanionApp: false
+        CFBundleLocalizations: [en, fr]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).watchdocs.watchkitapp
+        TARGETED_DEVICE_FAMILY: "4"
+        SDKROOT: watchos
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+
+  # ------------------------------------------------------------------ Tests
+  WatchDocsTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/WatchDocsTests
+      - path: Tests/Fixtures
+        buildPhase: resources
+    dependencies:
+      - target: WatchDocs
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).watchdocs.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/WatchDocs.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/WatchDocs
+        BUNDLE_LOADER: $(TEST_HOST)
+
+  WatchDocsUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/WatchDocsUITests
+    dependencies:
+      - target: WatchDocs
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).watchdocs.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: WatchDocs
+
+schemes:
+  WatchDocs:
+    build:
+      targets:
+        WatchDocs: all
+        WatchDocsShare: all
+        WatchDocsWatch: all
+    test:
+      targets:
+        - WatchDocsTests
+        - WatchDocsUITests
+      gatherCoverageData: true
+    run:
+      config: Debug
+  WatchDocsWatch:
+    build:
+      targets:
+        WatchDocsWatch: all
+    run:
+      config: Debug

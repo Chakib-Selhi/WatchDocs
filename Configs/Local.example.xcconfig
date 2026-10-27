@@ -1,0 +1,8 @@
+// Copy this file to Configs/Local.xcconfig and fill in your values.
+// Local.xcconfig is ignored by git.
+
+// Must be unique to you, e.g. com.yourname
+BUNDLE_PREFIX = com.yourname
+
+// 10 characters, see docs/INSTALL.md to find it.
+DEVELOPMENT_TEAM = XXXXXXXXXX

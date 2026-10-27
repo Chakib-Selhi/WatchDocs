@@ -1,0 +1,6 @@
+Liste d'épicerie
+
+- Pommes
+- Pain
+- Lait
+- Café
