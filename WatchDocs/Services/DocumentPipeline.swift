@@ -36,6 +36,18 @@ final class DocumentPipeline {
 
     private(set) var linkState: LinkState
     private(set) var watchContext: WatchContext?
+    /// Last time the watch app talked to the iPhone (ack, deletion, status...).
+    private(set) var lastWatchContact: Date? {
+        didSet { UserDefaults.standard.set(lastWatchContact, forKey: Self.lastContactKey) }
+    }
+    private static let lastContactKey = "lastWatchContact"
+
+    /// `WCSession.isWatchAppInstalled` is not always reliable (for example after
+    /// installing the watch app directly from Xcode), so any sign of life from the
+    /// watch app also counts.
+    var isWatchAppDetected: Bool {
+        linkState.isCounterpartAppInstalled || watchContext != nil || lastWatchContact != nil
+    }
 
     private var jobs: [Job] = []
     private var jobsAwaitingPassword: [UUID: Job] = [:]
@@ -59,6 +71,7 @@ final class DocumentPipeline {
         self.context = context
         self.linkState = transport.linkState
         self.watchContext = transport.watchContext
+        self.lastWatchContact = UserDefaults.standard.object(forKey: Self.lastContactKey) as? Date
         StoragePaths.prepare()
         recoverInterruptedWork()
         eventsTask = Task { [weak self] in
@@ -303,7 +316,23 @@ final class DocumentPipeline {
 
     // MARK: Transport events
 
+    /// Reads the current session state again (used when the status screen opens).
+    func refreshLinkState() {
+        linkState = transport.linkState
+        if let context = transport.watchContext { watchContext = context }
+    }
+
+    private func noteWatchContact() {
+        lastWatchContact = Date()
+    }
+
     private func handle(_ event: TransportEvent) {
+        switch event {
+        case .delivered, .deletedOnWatch, .resendRequested, .watchContextChanged:
+            noteWatchContact()
+        default:
+            break
+        }
         switch event {
         case .delivered(let id):
             guard let document = fetch(id) else { return }

@@ -20,6 +20,8 @@ struct WatchDocsWatchApp: App {
                 WatchLibrary.shared.reload()
                 let receiver = WatchLibrary.shared.receiver
                 Task.detached(priority: .utility) {
+                    // Fresh status for the iPhone (document count, free space).
+                    receiver.publishContext()
                     receiver.requestMissingFiles()
                     await receiver.assembler.cleanStaging()
                 }

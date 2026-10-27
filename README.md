@@ -10,6 +10,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/Chakib-Selhi/WatchDocs/actions/workflows/ci.yml"><img src="https://github.com/Chakib-Selhi/WatchDocs/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
   <img src="https://img.shields.io/badge/iOS-17%2B-000000?logo=apple" alt="iOS 17+">
   <img src="https://img.shields.io/badge/watchOS-10%2B-000000?logo=apple" alt="watchOS 10+">
@@ -24,6 +25,21 @@
 The Apple Watch cannot open documents. Existing apps limit the number of pages or files you can send. WatchDocs has **no page limit and no document limit**: the only limit is the free storage of the watch.
 
 Typical uses: a boarding pass or concert ticket with a QR code, presentation notes, a grocery list, a class schedule from Excel, a map for a run without your phone.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/iphone-library.png" width="220" alt="iPhone library"></td>
+    <td align="center"><img src="docs/screenshots/watch-library.png" width="220" alt="Watch library"></td>
+    <td align="center"><img src="docs/screenshots/watch-page-reader.png" width="220" alt="Watch page reader"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>iPhone: sent documents and delivery status</sub></td>
+    <td align="center"><sub>Apple Watch: document library</sub></td>
+    <td align="center"><sub>Apple Watch: Pages reader (page 2 of 12)</sub></td>
+  </tr>
+</table>
 
 ## Features
 
@@ -86,7 +102,7 @@ Swift 6 (strict concurrency in the shared package) · SwiftUI · Observation · 
 Requirements: a Mac with Xcode (iOS and watchOS platforms installed) and [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
 ```sh
-git clone https://github.com/<your-username>/WatchDocs.git
+git clone https://github.com/Chakib-Selhi/WatchDocs.git
 cd WatchDocs
 brew install xcodegen
 cp Configs/Local.example.xcconfig Configs/Local.xcconfig   # set your team ID and bundle prefix

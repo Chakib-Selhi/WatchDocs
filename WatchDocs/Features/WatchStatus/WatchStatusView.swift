@@ -8,17 +8,20 @@ struct WatchStatusView: View {
 
     var body: some View {
         let state = pipeline.linkState
+        let installed = pipeline.isWatchAppDetected
         NavigationStack {
             List {
                 Section {
-                    StatusLine(title: "Paired", ok: state.isPaired)
-                    StatusLine(title: "WatchDocs installed on the watch", ok: state.isCounterpartAppInstalled)
-                    StatusLine(title: "Reachable now", ok: state.isReachable)
+                    StatusLine(title: "Paired", state: state.isPaired ? .ok : .missing)
+                    StatusLine(title: "WatchDocs installed on the watch", state: installed ? .ok : .missing)
+                    // Reachable only means the watch app is in the foreground:
+                    // not being reachable is normal and does not block delivery.
+                    StatusLine(title: "WatchDocs open on the watch", state: state.isReachable ? .ok : .idle)
                 } footer: {
-                    if state.isPaired && !state.isCounterpartAppInstalled {
+                    if state.isPaired && !installed {
                         Text("Open the Watch app on the iPhone, then install WatchDocs from “Available Apps”.")
-                    } else if !state.isReachable {
-                        Text("Sending still works: files are queued and delivered when the watch is nearby, awake and unlocked. Opening WatchDocs on the watch speeds things up.")
+                    } else if installed && !state.isReachable {
+                        Text("Normal when WatchDocs is closed on the watch: documents are still delivered in the background.")
                     }
                 }
 
@@ -29,8 +32,8 @@ struct WatchStatusView: View {
                         if let free = context.freeBytes {
                             LabeledContent("Free space", value: ByteFormatting.string(free))
                         }
-                        LabeledContent("Updated") {
-                            Text(context.updatedAt, style: .relative)
+                        LabeledContent("Last contact") {
+                            Text(pipeline.lastWatchContact ?? context.updatedAt, style: .relative)
                         }
                     }
                 } else {
@@ -47,21 +50,35 @@ struct WatchStatusView: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .onAppear { pipeline.refreshLinkState() }
         }
     }
 }
 
 private struct StatusLine: View {
+    enum Indicator { case ok, missing, idle }
+
     let title: LocalizedStringKey
-    let ok: Bool
+    let state: Indicator
 
     var body: some View {
         HStack {
             Text(title)
             Spacer()
-            Image(systemName: ok ? "checkmark.circle.fill" : "xmark.circle")
-                .foregroundStyle(ok ? .green : .secondary)
-                .accessibilityLabel(ok ? Text("Yes") : Text("No"))
+            switch state {
+            case .ok:
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .accessibilityLabel(Text("Yes"))
+            case .missing:
+                Image(systemName: "xmark.circle")
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel(Text("No"))
+            case .idle:
+                Image(systemName: "moon.zzz")
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel(Text("No"))
+            }
         }
     }
 }

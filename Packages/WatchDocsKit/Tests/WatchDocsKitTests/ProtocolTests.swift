@@ -283,3 +283,30 @@ struct RecoveryTests {
         #expect(receiver.requestMissingFiles(idleFor: 3600) == 0)
     }
 }
+
+@Suite("Watch app detection")
+struct WatchAppDetectionTests {
+    @Test func sendRefusedWithoutAnySignOfTheWatchApp() async throws {
+        let root = TestFiles.makeTempDir()
+        let (phoneLink, _) = InMemoryLink.pair(root: root)
+        phoneLink.linkState.isCounterpartAppInstalled = false
+        let phone = PhoneTransport(link: phoneLink)
+        let package = try TestFiles.makePackage(pages: 1, in: root)
+        await #expect(throws: TransportError.watchAppNotInstalled) {
+            try await phone.send(package)
+        }
+    }
+
+    @Test func sendAllowedWhenTheWatchAppReportedItsStatus() async throws {
+        let root = TestFiles.makeTempDir()
+        let (phoneLink, watchLink) = InMemoryLink.pair(root: root)
+        // WCSession says "not installed", but the watch app already published a status.
+        phoneLink.linkState.isCounterpartAppInstalled = false
+        try watchLink.updateContext(WatchContext(documentCount: 0, usedBytes: 0, freeBytes: 1_000_000_000))
+        watchLink.deliver()
+        let phone = PhoneTransport(link: phoneLink)
+        let package = try TestFiles.makePackage(pages: 1, in: root)
+        try await phone.send(package)
+        #expect(phoneLink.pendingCount > 0)
+    }
+}

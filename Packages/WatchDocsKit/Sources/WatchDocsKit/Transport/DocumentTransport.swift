@@ -100,7 +100,11 @@ public final class PhoneTransport: DocumentTransport {
         let state = link.state
         guard state.isActivated else { throw TransportError.notActivated }
         guard state.isPaired else { throw TransportError.watchNotPaired }
-        guard state.isCounterpartAppInstalled else { throw TransportError.watchAppNotInstalled }
+        // isWatchAppInstalled can be wrong after a direct install from Xcode:
+        // a status received from the watch app proves it is installed.
+        guard state.isCounterpartAppInstalled || link.receivedContext != nil else {
+            throw TransportError.watchAppNotInstalled
+        }
 
         let id = package.manifest.id
         // Manifest first so the watch can show "Receiving..." right away.

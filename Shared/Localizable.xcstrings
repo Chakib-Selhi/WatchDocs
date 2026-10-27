@@ -375,6 +375,16 @@
         }
       }
     },
+    "Last contact" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernier contact"
+          }
+        }
+      }
+    },
     "Later" : {
       "localizations" : {
         "fr" : {
@@ -431,6 +441,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune limite"
+          }
+        }
+      }
+    },
+    "Normal when WatchDocs is closed on the watch: documents are still delivered in the background." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal quand WatchDocs est fermé sur la montre : les documents sont quand même livrés en arrière-plan."
           }
         }
       }
@@ -646,6 +666,7 @@
       }
     },
     "Reachable now" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -747,6 +768,7 @@
       }
     },
     "Sending still works: files are queued and delivered when the watch is nearby, awake and unlocked. Opening WatchDocs on the watch speeds things up." : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -997,6 +1019,7 @@
       }
     },
     "Updated" : {
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1102,6 +1125,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "WatchDocs n’est pas installé sur la montre. Installez-le depuis l’app Watch de l’iPhone."
+          }
+        }
+      }
+    },
+    "WatchDocs open on the watch" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WatchDocs ouvert sur la montre"
           }
         }
       }
